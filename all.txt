@@ -697,3 +697,35 @@ future_sales_pred = model.predict(future_months)
 # Output predictions
 for month, sales in zip(future_months['Month'], future_sales_pred):
     print(f"Predicted sales for month {month}: {sales:.2f} units")
+
+---------------------------
+(10)
+import numpy as np
+from scipy.stats import norm
+
+# Sample data: two Gaussian clusters
+data = np.hstack([np.random.normal(0, 1, 100), np.random.normal(5, 1, 100)])
+k = 2  # number of clusters
+
+# Initialize parameters
+means = np.random.choice(data, k)
+variances = np.full(k, 1.0)
+weights = np.full(k, 1/k)
+
+for _ in range(100):  # EM iterations
+    # E-Step
+    resp = np.array([w * norm.pdf(data, m, np.sqrt(v)) for w, m, v in zip(weights, means, variances)])
+    resp /= resp.sum(axis=0)
+
+    # M-Step
+    for i in range(k):
+        r = resp[i]
+        total = r.sum()
+        means[i] = (r * data).sum() / total
+        variances[i] = (r * (data - means[i])**2).sum() / total
+        weights[i] = total / len(data)
+
+# Final parameters
+print("Means:", means)
+print("Variances:", variances)
+print("Weights:", weights)
